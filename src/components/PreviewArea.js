@@ -1,7 +1,8 @@
+// PreviewArea.js
 import React from 'react';
 import CatSprite from './CatSprite';
 
-export default function PreviewArea({ sprites, setSprites }) {
+export default function PreviewArea({ sprites, setSprites, playAnimations }) {
   const selectSprite = (id) => {
     setSprites(sprites.map(sprite => ({
       ...sprite,
@@ -11,6 +12,13 @@ export default function PreviewArea({ sprites, setSprites }) {
 
   return (
     <div className="h-full p-4 bg-gray-50">
+      <button 
+        onClick={playAnimations}
+        className="w-full mb-4 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+      >
+        Play
+      </button>
+      
       <div className="relative h-full border-2 border-dashed border-gray-300 rounded-lg">
         {sprites.map(sprite => (
           <div 
@@ -21,7 +29,8 @@ export default function PreviewArea({ sprites, setSprites }) {
             style={{
               left: `${sprite.x}px`,
               top: `${sprite.y}px`,
-              transform: `rotate(${sprite.rotation}deg)`
+              transform: `rotate(${sprite.rotation}deg)`,
+              transition: 'all 0.5s ease'
             }}
             onClick={() => selectSprite(sprite.id)}
           >

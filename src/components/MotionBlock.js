@@ -1,3 +1,4 @@
+// MotionBlock.js
 import React from 'react';
 import { useDrag } from 'react-dnd';
 
@@ -5,22 +6,31 @@ export default function MotionBlock({ command, onDragStart, className }) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'block',
     item: () => {
-      const defaultParams = {
-        steps: 10,
-        degrees: 15,
-        x: 0,
-        y: 0,
-        text: 'Hello',
-        seconds: 2,
-        count: 2,
-        direction: 'right'
+      // Define default parameters for each command
+      const params = {
+        move: { steps: 10 },
+        turn: { degrees: 15 },
+        goto: { x: 0, y: 0 },
+        say: { text: 'Hello!', seconds: 2 },
+        think: { text: 'Hmm...', seconds: 2 },
+        repeat: { count: 2 }
       };
-      return { command, params: defaultParams };
+      return { command, params: params[command] };
     },
     collect: monitor => ({
       isDragging: !!monitor.isDragging(),
     }),
   }));
+
+  // Display text based on command
+  const blockText = {
+    move: 'Move 10 steps',
+    turn: 'Turn 15 degrees',
+    goto: 'Go to x:0 y:0',
+    say: 'Say Hello! for 2 seconds',
+    think: 'Think Hmm... for 2 seconds',
+    repeat: 'Repeat 2 times'
+  }[command];
 
   return (
     <div
@@ -28,29 +38,8 @@ export default function MotionBlock({ command, onDragStart, className }) {
       className={`p-2 mb-2 rounded cursor-move ${className} ${
         isDragging ? 'opacity-50' : 'opacity-100'
       }`}
-      onClick={(e) => {
-        const item = {
-          command,
-          params: {
-            steps: 10,
-            degrees: 15,
-            x: 0,
-            y: 0,
-            text: 'Hello',
-            seconds: 2,
-            count: 2,
-            direction: 'right'
-          }
-        };
-        onDragStart(e, item);
-      }}
     >
-      {command === 'move' && 'Move 10 steps'}
-      {command === 'turn' && 'Turn 15 degrees'}
-      {command === 'goto' && 'Go to x: y:'}
-      {command === 'say' && 'Say Hello for 2 seconds'}
-      {command === 'think' && 'Think Hmm for 2 seconds'}
-      {command === 'repeat' && 'Repeat 2 times'}
+      {blockText}
     </div>
   );
 }
