@@ -1,4 +1,3 @@
-// App.js
 import React, { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import MidArea from "./components/MidArea";
@@ -21,10 +20,10 @@ export default function App() {
   const setActiveSprite = (id) => {
     setSprites(prev => prev.map(sprite => ({
       ...sprite,
-      isSpeaking: false,
-      isThinking: false
+      isActive: sprite.id === id
     })));
   };
+
   const executeAnimation = async (animation, spriteId) => {
     return new Promise(resolve => {
       setSprites(prev => prev.map(sprite => {
@@ -72,23 +71,8 @@ export default function App() {
       }));
     });
   };
-  
-  const playAnimations = async () => {
-    setIsPlaying(true);
-    const activeSprite = sprites.find(s => s.isActive);
-    
-    if (!activeSprite) {
-      setIsPlaying(false);
-      return;
-    }
-  
-    // Reset all speech/thought bubbles
-    setSprites(prev => prev.map(sprite => ({
-      ...sprite,
-      isSpeaking: false,
-      isThinking: false
-    })));
-  
+
+  const executeSpriteAnimations = async (sprite) => {
     // Process animations with repeat support
     const processAnimations = async (animations, repeatCount = 1) => {
       for (let i = 0; i < repeatCount; i++) {
@@ -99,7 +83,7 @@ export default function App() {
             // Find the end of the repeat block
             let endIndex = j + 1;
             while (endIndex < animations.length && 
-                   animations[endIndex].command !== 'repeat') {
+                  animations[endIndex].command !== 'repeat') {
               endIndex++;
             }
             
@@ -110,13 +94,30 @@ export default function App() {
             );
             j = endIndex;
           } else {
-            await executeAnimation(animation, activeSprite.id);
+            await executeAnimation(animation, sprite.id);
           }
         }
       }
     };
-  
-    await processAnimations(activeSprite.animations);
+    
+    await processAnimations(sprite.animations);
+  };
+
+  const playAnimations = async () => {
+    setIsPlaying(true);
+    
+    // Reset all speech/thought bubbles
+    setSprites(prev => prev.map(sprite => ({
+      ...sprite,
+      isSpeaking: false,
+      isThinking: false
+    })));
+
+    // Execute animations for all sprites in parallel
+    await Promise.all(
+      sprites.map(sprite => executeSpriteAnimations(sprite))
+    );
+    
     setIsPlaying(false);
   };
 
@@ -132,27 +133,17 @@ export default function App() {
         rotation: 0,
         animations: [],
         isActive: false,
-        isSpeaking: false,
-        isThinking: false,
-        speechText: '',
-        thoughtText: ''
       }
     ]);
-    setActiveSprite(newId);
   };
 
   const removeSprite = (id) => {
-    if (sprites.length <= 1) return; // Keep at least one sprite
+    if (sprites.length <= 1) return;
     setSprites(sprites.filter(sprite => sprite.id !== id));
-    if (sprites.find(s => s.id === id)?.isActive) {
-      setActiveSprite(sprites[0].id);
-    }
   };
 
-  // Update the App.js return statement to pass new props:
-
   return (
-    <div className="bg-blue-100  font-sans">
+    <div className="bg-blue-100 font-sans">
       <div className="h-screen overflow-hidden flex flex-row">
         <div className="flex-1 h-screen overflow-hidden flex flex-row bg-white border-t border-r border-gray-200 rounded-tr-xl mr-2">
           <Sidebar />
