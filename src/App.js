@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import MidArea from "./components/MidArea";
 import PreviewArea from "./components/PreviewArea";
@@ -12,10 +12,13 @@ export default function App() {
       name: 'Cat 1',
       rotation: 0,
       animations: [],
-      isActive: true
+      isActive: true,
+      isFlashing: false
     }
   ]);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [heroMode, setHeroMode] = useState(false);
+  const [animationLoop, setAnimationLoop] = useState(null);
 
   const setActiveSprite = (id) => {
     setSprites(prev => prev.map(sprite => ({
@@ -28,9 +31,9 @@ export default function App() {
     return new Promise(resolve => {
       setSprites(prev => prev.map(sprite => {
         if (sprite.id !== spriteId) return sprite;
-        
-        const newState = {...sprite};
-        switch(animation.command) {
+
+        const newState = { ...sprite };
+        switch (animation.command) {
           case 'move':
             newState.x += animation.params.steps;
             setTimeout(resolve, 1000);
@@ -48,8 +51,8 @@ export default function App() {
             newState.isSpeaking = true;
             newState.speechText = animation.params.text;
             setTimeout(() => {
-              setSprites(prev => prev.map(s => 
-                s.id === spriteId ? {...s, isSpeaking: false} : s
+              setSprites(prev => prev.map(s =>
+                s.id === spriteId ? { ...s, isSpeaking: false } : s
               ));
               resolve();
             }, animation.params.seconds * 1000);
@@ -58,8 +61,8 @@ export default function App() {
             newState.isThinking = true;
             newState.thoughtText = animation.params.text;
             setTimeout(() => {
-              setSprites(prev => prev.map(s => 
-                s.id === spriteId ? {...s, isThinking: false} : s
+              setSprites(prev => prev.map(s =>
+                s.id === spriteId ? { ...s, isThinking: false } : s
               ));
               resolve();
             }, animation.params.seconds * 1000);
@@ -78,15 +81,15 @@ export default function App() {
       for (let i = 0; i < repeatCount; i++) {
         for (let j = 0; j < animations.length; j++) {
           const animation = animations[j];
-          
+
           if (animation.command === 'repeat') {
             // Find the end of the repeat block
             let endIndex = j + 1;
-            while (endIndex < animations.length && 
-                  animations[endIndex].command !== 'repeat') {
+            while (endIndex < animations.length &&
+              animations[endIndex].command !== 'repeat') {
               endIndex++;
             }
-            
+
             // Process the nested animations
             await processAnimations(
               animations.slice(j + 1, endIndex),
@@ -99,27 +102,154 @@ export default function App() {
         }
       }
     };
-    
+
     await processAnimations(sprite.animations);
   };
 
+  const executeAnimationFrame = async () => {
+    setSprites(prev => {
+      prev.forEach(sprite => {
+        if (sprite.animations.length === 0) return;
+  
+        const animation = sprite.animations[0];
+  
+        executeAnimation(animation, sprite.id); // no await needed here
+      });
+      return [...prev];
+    });
+  };
+  
+
+  const invertMovement = (animations) => {
+    return animations.map(animation => {
+      if (animation.command === 'move') {
+        return {
+          ...animation,
+          params: {
+            ...animation.params,
+            steps: -animation.params.steps
+          }
+        };
+      }
+      if (animation.command === 'repeat') {
+        return {
+          ...animation,
+          params: {
+            ...animation.params,
+            animations: invertMovement(animation.params.animations || [])
+          }
+        };
+      }
+      return animation;
+    });
+  };
+
+  const checkCollisions = () => {
+    setSprites(prev => {
+      const newSprites = [...prev];
+      const collisionThreshold = 50;
+      let collisionOccurred = false;
+
+      for (let i = 0; i < newSprites.length; i++) {
+        for (let j = i + 1; j < newSprites.length; j++) {
+          const sprite1 = newSprites[i];
+          const sprite2 = newSprites[j];
+
+          const dx = sprite1.x - sprite2.x;
+          const dy = sprite1.y - sprite2.y;
+          const distance = Math.hypot(dx, dy);
+
+          if (distance < collisionThreshold) {
+            collisionOccurred = true;
+
+            if (!sprite1.isFlashing && !sprite2.isFlashing) {
+              // Only invert the movement animations (no direction flip)
+              const tempAnimations = sprite1.animations;
+
+              newSprites[i] = {
+                ...sprite1,
+                animations: sprite2.animations,
+                isFlashing: true
+              };
+
+              newSprites[j] = {
+                ...sprite2,
+                animations: tempAnimations,
+                isFlashing: true
+              };
+
+            }
+          }
+        }
+      }
+
+      if (collisionOccurred) {
+        setTimeout(() => {
+          setSprites(prev => prev.map(s => ({
+            ...s,
+            isFlashing: false
+          })));
+        }, 300);
+      }
+
+      return newSprites;
+    });
+  };
+
+
+
+
   const playAnimations = async () => {
     setIsPlaying(true);
-    
-    // Reset all speech/thought bubbles
+
     setSprites(prev => prev.map(sprite => ({
       ...sprite,
       isSpeaking: false,
-      isThinking: false
+      isThinking: false,
+      isFlashing: false
     })));
 
-    // Execute animations for all sprites in parallel
-    await Promise.all(
-      sprites.map(sprite => executeSpriteAnimations(sprite))
-    );
-    
-    setIsPlaying(false);
+    if (heroMode) {
+
+      // Create a loop function
+      const loop = async () => {
+        if (!isPlaying) return;
+        await executeAnimationFrame();
+        checkCollisions();
+        animationLoop = setTimeout(loop, 100);
+      };
+
+      setAnimationLoop(loop);
+      loop();
+    } else {
+      // Normal mode
+      await Promise.all(
+        sprites.map(sprite => executeSpriteAnimations(sprite))
+      );
+      setIsPlaying(false);
+    }
   };
+
+  // Update the stopAnimations function
+  const stopAnimations = () => {
+    setIsPlaying(false);
+    if (animationLoop) {
+      clearTimeout(animationLoop);
+      setAnimationLoop(null);
+    }
+
+    // Reset to initial positions when in hero mode
+    if (heroMode) {
+      setSprites(prev => prev.map(sprite => ({
+        ...sprite,
+        x: 100, // Default X position
+        y: 100, // Default Y position
+        rotation: 0,
+        isFlashing: false
+      })));
+    }
+  };
+
 
   const addSprite = () => {
     const newId = Date.now();
@@ -133,6 +263,7 @@ export default function App() {
         rotation: 0,
         animations: [],
         isActive: false,
+        isFlashing: false
       }
     ]);
   };
@@ -158,8 +289,11 @@ export default function App() {
             sprites={sprites}
             setSprites={setSprites}
             playAnimations={playAnimations}
+            stopAnimations={stopAnimations}
             addSprite={addSprite}
             removeSprite={removeSprite}
+            heroMode={heroMode}
+            setHeroMode={setHeroMode}
           />
         </div>
       </div>
