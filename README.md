@@ -1,7 +1,5 @@
 # Scratch starter project
 
-# 🐾 Scratch-Like Sprite Animation App
-
 A web-based animation platform inspired by Scratch, allowing users to create, preview, and interact with animated sprites using a visual block-like command system.
 
 ## 🚀 Features
