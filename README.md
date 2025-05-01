@@ -1,6 +1,5 @@
 # Scratch starter project
 
-
 A web-based animation platform inspired by Scratch, allowing users to create, preview, and interact with animated sprites using a visual block-like command system.
 
 ## 🚀 Features
