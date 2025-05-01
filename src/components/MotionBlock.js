@@ -75,8 +75,6 @@ export default function MotionBlock({ command, className }) {
             case 'think':
                 return (
                     <div className="flex flex-row">
-
-                        {/* Second Line - Text Input */}
                         <div className="mb-1">
                             <input
                                 type="text"
@@ -86,8 +84,6 @@ export default function MotionBlock({ command, className }) {
                                 placeholder={command === 'say' ? "What to say..." : "What to think..."}
                             />
                         </div>
-
-                        {/* Third Line - Duration */}
                         <div className="flex items-center space-x-1">
                             <span className="text-xs text-white-800">for</span>
                             <input
@@ -120,12 +116,10 @@ export default function MotionBlock({ command, className }) {
                 return null;
         }
     };
-
     return (
         <div
             ref={drag}
-            className={`p-3 mb-3 rounded cursor-move ${className} ${isDragging ? 'opacity-50' : 'opacity-100'
-                }`}
+            className={`p-3 mb-3 rounded-xl cursor-move shadow-md transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.97] ${className} ${isDragging ? 'opacity-40' : 'opacity-100'}`}
         >
             <div className="flex items-center">
                 <span className="font-medium">

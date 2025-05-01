@@ -1,4 +1,3 @@
-// MidArea.js
 import React from 'react';
 import { useDrop } from 'react-dnd';
 
@@ -15,9 +14,7 @@ export default function MidArea({ sprites, setSprites }) {
             anim.command === item.command && 
             JSON.stringify(anim.params) === JSON.stringify(item.params)
           );
-          
           if (isDuplicate) return sprite;
-          
           return {
             ...sprite,
             animations: [...sprite.animations, item]
@@ -63,34 +60,37 @@ export default function MidArea({ sprites, setSprites }) {
   return (
     <div 
       ref={drop}
-      className={`flex-1 h-full p-4 overflow-auto ${
-        isOver ? 'bg-blue-50' : 'bg-white'
+      className={`flex-1 h-full p-6 overflow-auto transition-all duration-300 rounded-xl border-2 ${
+        isOver ? 'bg-blue-100 border-blue-400 shadow-lg' : 'bg-white border-slate-300'
       }`}
     >
       {sprites.filter(s => s.isActive).map(sprite => (
-        <div key={sprite.id} className="mb-6">
-          <h3 className="font-semibold text-gray-700 mb-2">{sprite.name}</h3>
-          <div className="space-y-2">
+        <div key={sprite.id} className="mb-8">
+          <h3 className="text-xl font-bold text-slate-700 mb-4 border-b pb-2">
+            🧩 {sprite.name}'s Script
+          </h3>
+  
+          <div className="space-y-3">
             {sprite.animations.map((animation, index) => (
               <div 
                 key={index} 
-                className="flex items-center bg-gray-100 p-2 rounded border border-gray-200 text-gray-800"
+                className="flex items-center justify-between bg-purple-100 border border-purple-300 p-3 rounded-lg shadow-sm transition hover:bg-slate-50"
               >
-                <span className="flex-1">{getAnimationText(animation)}</span>
+                <span className="flex-1 font-mono text-sm text-slate-800">{getAnimationText(animation)}</span>
                 <button 
                   onClick={() => removeAnimation(sprite.id, index)}
-                  className="text-red-500 hover:text-red-700 ml-2"
+                  className="ml-3 text-red-500 hover:text-red-700 text-lg font-bold"
                 >
                   ×
                 </button>
               </div>
             ))}
             {sprite.animations.length === 0 && (
-              <p className="text-gray-500">Drag blocks here</p>
+              <p className="text-slate-400 italic text-sm mt-4">🧲 Drag blocks here to build your script...</p>
             )}
           </div>
         </div>
       ))}
     </div>
-  );
+  ); 
 } 

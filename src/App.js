@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import MidArea from "./components/MidArea";
 import PreviewArea from "./components/PreviewArea";
@@ -9,7 +9,7 @@ export default function App() {
       id: 1,
       x: 100,
       y: 100,
-      name: 'Cat 1',
+      name: 'Sprite 1',
       rotation: 0,
       animations: [],
       isActive: true,
@@ -89,7 +89,6 @@ export default function App() {
               animations[endIndex].command !== 'repeat') {
               endIndex++;
             }
-
             // Process the nested animations
             await processAnimations(
               animations.slice(j + 1, endIndex),
@@ -102,7 +101,6 @@ export default function App() {
         }
       }
     };
-
     await processAnimations(sprite.animations);
   };
 
@@ -110,16 +108,13 @@ export default function App() {
     setSprites(prev => {
       prev.forEach(sprite => {
         if (sprite.animations.length === 0) return;
-  
         const animation = sprite.animations[0];
-  
-        executeAnimation(animation, sprite.id); // no await needed here
+        executeAnimation(animation, sprite.id);
       });
       return [...prev];
     });
   };
   
-
   const invertMovement = (animations) => {
     return animations.map(animation => {
       if (animation.command === 'move') {
@@ -163,7 +158,7 @@ export default function App() {
             collisionOccurred = true;
 
             if (!sprite1.isFlashing && !sprite2.isFlashing) {
-              // Only invert the movement animations (no direction flip)
+              // Only invert the movement animations
               const tempAnimations = sprite1.animations;
 
               newSprites[i] = {
@@ -182,7 +177,6 @@ export default function App() {
           }
         }
       }
-
       if (collisionOccurred) {
         setTimeout(() => {
           setSprites(prev => prev.map(s => ({
@@ -191,26 +185,19 @@ export default function App() {
           })));
         }, 300);
       }
-
       return newSprites;
     });
   };
 
-
-
-
   const playAnimations = async () => {
     setIsPlaying(true);
-
     setSprites(prev => prev.map(sprite => ({
       ...sprite,
       isSpeaking: false,
       isThinking: false,
       isFlashing: false
     })));
-
     if (heroMode) {
-
       // Create a loop function
       const loop = async () => {
         if (!isPlaying) return;
@@ -218,7 +205,6 @@ export default function App() {
         checkCollisions();
         animationLoop = setTimeout(loop, 100);
       };
-
       setAnimationLoop(loop);
       loop();
     } else {
@@ -250,16 +236,26 @@ export default function App() {
     }
   };
 
+  const SPRITE_SPACING = 120; // distance between sprites
 
   const addSprite = () => {
     const newId = Date.now();
+  
+    let baseX = 100;
+    let baseY = 100;
+  
+    if (sprites.length > 0) {
+      const lastSprite = sprites[sprites.length - 1]; // 🟢 use the LAST sprite
+      baseX = lastSprite.x + SPRITE_SPACING;
+      baseY = lastSprite.y;
+    }
     setSprites([
       ...sprites,
       {
         id: newId,
-        x: Math.random() * 300,
-        y: Math.random() * 300,
-        name: `Cat ${sprites.length + 1}`,
+        x: baseX,
+        y: baseY,
+        name: `Sprite ${sprites.length + 1}`,
         rotation: 0,
         animations: [],
         isActive: false,
@@ -267,7 +263,7 @@ export default function App() {
       }
     ]);
   };
-
+  
   const removeSprite = (id) => {
     if (sprites.length <= 1) return;
     setSprites(sprites.filter(sprite => sprite.id !== id));
