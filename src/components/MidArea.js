@@ -8,16 +8,16 @@ export default function MidArea({ sprites, setSprites }) {
       setSprites(prevSprites => {
         return prevSprites.map(sprite => {
           if (!sprite.isActive) return sprite;
-          
-          // Check if this is a duplicate block
-          const isDuplicate = sprite.animations.some(anim => 
-            anim.command === item.command && 
-            JSON.stringify(anim.params) === JSON.stringify(item.params)
-          );
-          if (isDuplicate) return sprite;
+
+          // Assign a unique ID to each dropped block
+          const newBlock = {
+            ...item,
+            id: crypto.randomUUID()
+          };
+
           return {
             ...sprite,
-            animations: [...sprite.animations, item]
+            animations: [...sprite.animations, newBlock]
           };
         });
       });
@@ -27,21 +27,21 @@ export default function MidArea({ sprites, setSprites }) {
     }),
   }));
 
-  const removeAnimation = (spriteId, index) => {
-    setSprites(prev => prev.map(sprite => 
+  const removeAnimation = (spriteId, blockId) => {
+    setSprites(prev => prev.map(sprite =>
       sprite.id === spriteId
         ? {
             ...sprite,
-            animations: sprite.animations.filter((_, i) => i !== index)
+            animations: sprite.animations.filter(anim => anim.id !== blockId)
           }
         : sprite
     ));
   };
 
   const getAnimationText = (animation) => {
-    switch(animation.command) {
+    switch (animation.command) {
       case 'move':
-        return `Move ${animation.params?.steps ?? 10} steps`; // Fallback to default if needed
+        return `Move ${animation.params?.steps ?? 10} steps`;
       case 'turn':
         return `Turn ${animation.params?.degrees ?? 15} degrees`;
       case 'goto':
@@ -58,7 +58,7 @@ export default function MidArea({ sprites, setSprites }) {
   };
 
   return (
-    <div 
+    <div
       ref={drop}
       className={`flex-1 h-full p-6 overflow-auto transition-all duration-300 rounded-xl border-2 ${
         isOver ? 'bg-blue-100 border-blue-400 shadow-lg' : 'bg-white border-slate-300'
@@ -69,16 +69,18 @@ export default function MidArea({ sprites, setSprites }) {
           <h3 className="text-xl font-bold text-slate-700 mb-4 border-b pb-2">
             🧩 {sprite.name}'s Script
           </h3>
-  
+
           <div className="space-y-3">
-            {sprite.animations.map((animation, index) => (
-              <div 
-                key={index} 
+            {sprite.animations.map((animation) => (
+              <div
+                key={animation.id}
                 className="flex items-center justify-between bg-purple-100 border border-purple-300 p-3 rounded-lg shadow-sm transition hover:bg-slate-50"
               >
-                <span className="flex-1 font-mono text-sm text-slate-800">{getAnimationText(animation)}</span>
-                <button 
-                  onClick={() => removeAnimation(sprite.id, index)}
+                <span className="flex-1 font-mono text-sm text-slate-800">
+                  {getAnimationText(animation)}
+                </span>
+                <button
+                  onClick={() => removeAnimation(sprite.id, animation.id)}
                   className="ml-3 text-red-500 hover:text-red-700 text-lg font-bold"
                 >
                   ×
@@ -92,5 +94,5 @@ export default function MidArea({ sprites, setSprites }) {
         </div>
       ))}
     </div>
-  ); 
-} 
+  );
+}
