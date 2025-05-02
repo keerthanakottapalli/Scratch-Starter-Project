@@ -218,23 +218,9 @@ export default function App() {
 
   // Update the stopAnimations function
   const stopAnimations = () => {
-    setIsPlaying(false);
-    if (animationLoop) {
-      clearTimeout(animationLoop);
-      setAnimationLoop(null);
-    }
-
-    // Reset to initial positions when in hero mode
-    if (heroMode) {
-      setSprites(prev => prev.map(sprite => ({
-        ...sprite,
-        x: 100, // Default X position
-        y: 100, // Default Y position
-        rotation: 0,
-        isFlashing: false
-      })));
-    }
-  };
+    window.location.reload();
+  };  
+  
 
   const SPRITE_SPACING = 120; // distance between sprites
 
