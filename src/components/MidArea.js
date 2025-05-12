@@ -31,9 +31,9 @@ export default function MidArea({ sprites, setSprites }) {
     setSprites(prev => prev.map(sprite =>
       sprite.id === spriteId
         ? {
-            ...sprite,
-            animations: sprite.animations.filter(anim => anim.id !== blockId)
-          }
+          ...sprite,
+          animations: sprite.animations.filter(anim => anim.id !== blockId)
+        }
         : sprite
     ));
   };
@@ -44,6 +44,8 @@ export default function MidArea({ sprites, setSprites }) {
         return `Move ${animation.params?.steps ?? 10} steps`;
       case 'turn':
         return `Turn ${animation.params?.degrees ?? 15} degrees`;
+      case 'anti-clockwise':
+        return `Anti Clockwise ${animation.params?.degrees ?? 15} degrees`;
       case 'goto':
         return `Go to x:${animation.params?.x ?? 0} y:${animation.params?.y ?? 0}`;
       case 'say':
@@ -60,9 +62,8 @@ export default function MidArea({ sprites, setSprites }) {
   return (
     <div
       ref={drop}
-      className={`flex-1 h-full p-6 overflow-auto transition-all duration-300 rounded-xl border-2 ${
-        isOver ? 'bg-blue-100 border-blue-400 shadow-lg' : 'bg-white border-slate-300'
-      }`}
+      className={`flex-1 h-full p-6 overflow-auto transition-all duration-300 rounded-xl border-2 ${isOver ? 'bg-blue-100 border-blue-400 shadow-lg' : 'bg-white border-slate-300'
+        }`}
     >
       {sprites.filter(s => s.isActive).map(sprite => (
         <div key={sprite.id} className="mb-8">
