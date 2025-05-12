@@ -7,8 +7,8 @@ export default function App() {
   const [sprites, setSprites] = useState([
     {
       id: 1,
-      x: 100,
-      y: 100,
+      x: 50,
+      y: 50,
       name: 'Sprite 1',
       rotation: 0,
       animations: [],
@@ -40,6 +40,10 @@ export default function App() {
             break;
           case 'turn':
             newState.rotation += animation.params.degrees;
+            setTimeout(resolve, 1000);
+            break;
+            case 'anti-clockwise':
+            newState.rotation -= animation.params.degrees;
             setTimeout(resolve, 1000);
             break;
           case 'goto':
@@ -222,38 +226,38 @@ export default function App() {
   };  
   
 
-  const SPRITE_SPACING = 120; // distance between sprites
+const addSprite = () => {
+  const newId = Date.now();
 
-  const addSprite = () => {
-    const newId = Date.now();
-  
-    let baseX = 100;
-    let baseY = 100;
-  
-    if (sprites.length > 0) {
-      const lastSprite = sprites[sprites.length - 1]; // 🟢 use the LAST sprite
-      baseX = lastSprite.x + SPRITE_SPACING;
-      baseY = lastSprite.y;
+  // Random position within some reasonable bounds (adjust as needed)
+  const randomX = Math.floor(Math.random() * 400) + 10; 
+  const randomY = Math.floor(Math.random() * 300) + 10;
+
+  setSprites(prev => [
+    ...prev,
+    {
+      id: newId,
+      x: randomX,
+      y: randomY,
+      name: `Sprite ${prev.length + 1}`,
+      rotation: 0,
+      animations: [],
+      isActive: false,
+      isFlashing: false,
+      isSpeaking: false,
+      isThinking: false,
+      speechText: '',
+      thoughtText: ''
     }
-    setSprites([
-      ...sprites,
-      {
-        id: newId,
-        x: baseX,
-        y: baseY,
-        name: `Sprite ${sprites.length + 1}`,
-        rotation: 0,
-        animations: [],
-        isActive: false,
-        isFlashing: false
-      }
-    ]);
-  };
+  ]);
+};
+
+
   
-  const removeSprite = (id) => {
-    if (sprites.length <= 1) return;
-    setSprites(sprites.filter(sprite => sprite.id !== id));
-  };
+const removeSprite = (id) => {
+  if (!id) return;
+  setSprites(prev => prev.filter(sprite => sprite.id !== id));
+};
 
   return (
     <div className="bg-blue-100 font-sans">

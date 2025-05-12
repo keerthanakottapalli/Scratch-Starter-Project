@@ -16,6 +16,10 @@ export default function Sidebar() {
           className="bg-blue-500 text-white"
         />
         <MotionBlock 
+          command="anti-clockwise"
+          className="bg-blue-500 text-white"
+        />
+        <MotionBlock 
           command="goto"
           className="bg-blue-500 text-white"
         />

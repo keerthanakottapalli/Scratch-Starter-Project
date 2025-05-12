@@ -5,10 +5,10 @@ A web-based animation platform inspired by Scratch, allowing users to create, pr
 ## 🚀 Features
 
 - Add, remove, and manage multiple sprites
-- Define custom animations (move, turn, say, think, repeat, etc.)
+- Define custom animations (move, turn, anti-clockwise say, think, repeat, etc.)
 - Real-time preview of animations
 - Collision detection with behavior swapping (hero mode)
-- Play/Pause/Reset controls
+- Play/Reset controls
 - Responsive and intuitive UI built with React and Tailwind CSS
 
 ## 🛠 Tech Stack

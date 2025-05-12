@@ -6,6 +6,7 @@ export default function MotionBlock({ command, className }) {
     const [params, setParams] = useState({
         move: { steps: 10 },
         turn: { degrees: 15 },
+        'anti-clockwise': { degrees: 15 },
         goto: { x: 0, y: 0 },
         say: { text: 'Hello!', seconds: 2 },
         think: { text: 'Hmm...', seconds: 2 },
@@ -28,9 +29,10 @@ export default function MotionBlock({ command, className }) {
     const handleParamChange = (key, value) => {
         setParams(prev => ({
             ...prev,
-            [key]: isNaN(value) ? value : Number(value)
+            [key]: key === 'text' ? value : Number(value)
         }));
     };
+
 
     const renderInputs = () => {
         switch (command) {
@@ -44,6 +46,15 @@ export default function MotionBlock({ command, className }) {
                     />
                 );
             case 'turn':
+                return (
+                    <input
+                        type="number"
+                        value={params.degrees}
+                        onChange={(e) => handleParamChange('degrees', e.target.value)}
+                        className="w-12 ml-2 px-1 py-0.5 border rounded text-gray-800 bg-white focus:ring-1 focus:ring-blue-300 text-sm h-7"
+                    />
+                );
+            case 'anti-clockwise':
                 return (
                     <input
                         type="number"
@@ -105,7 +116,7 @@ export default function MotionBlock({ command, className }) {
                                 type="number"
                                 min="1"
                                 value={params.count}
-                                onChange={(e) => handleParamChange('count', Math.max(1, e.target.value))}
+                                onChange={(e) => handleParamChange('count', Math.max(0, e.target.value))}
                                 className="w-10 px-1 py-0.5 mx-2 border rounded text-gray-800 bg-white focus:ring-1 focus:ring-blue-300 text-sm h-7"
                             />
                             <span className="text-sm">times</span>
@@ -125,6 +136,7 @@ export default function MotionBlock({ command, className }) {
                 <span className="font-medium">
                     {command === 'move' && 'Move'}
                     {command === 'turn' && 'Turn'}
+                    {command === 'anti-clockwise' && 'Anti Clockwise'}
                     {command === 'goto' && 'Go to'}
                     {command === 'say' && 'Say'}
                     {command === 'think' && 'Think'}
